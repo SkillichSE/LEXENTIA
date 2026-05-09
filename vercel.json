@@ -1,4 +1,7 @@
 {
   "buildCommand": "node build-config.js",
-  "outputDirectory": "public"
+  "outputDirectory": "public",
+  "rewrites": [
+    { "source": "/auth", "destination": "/auth.html" }
+  ]
 }
