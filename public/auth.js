@@ -2,7 +2,7 @@
 // handles email password and github oauth sign in
 
 // global variables
-let supabase = null;
+let _supabaseClient = null;
 
 // dom elements
 const authError = document.getElementById('auth-error');
@@ -122,7 +122,7 @@ function setupFormHandlers() {
       e.preventDefault();
       clearMessages();
 
-      if (!supabase) {
+      if (!_supabaseClient) {
         showError('Auth not initialized. Check console for errors.');
         return;
       }
@@ -133,7 +133,7 @@ function setupFormHandlers() {
       setLoading(signinBtn, true);
 
       try {
-        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        const { data, error } = await _supabaseClient.auth.signInWithPassword({ email, password });
 
         setLoading(signinBtn, false);
 
@@ -157,7 +157,7 @@ function setupFormHandlers() {
       e.preventDefault();
       clearMessages();
 
-      if (!supabase) {
+      if (!_supabaseClient) {
         showError('Auth not initialized. Check console for errors.');
         return;
       }
@@ -168,7 +168,7 @@ function setupFormHandlers() {
       setLoading(signupBtn, true);
 
       try {
-        const { data, error } = await supabase.auth.signUp({
+        const { data, error } = await _supabaseClient.auth.signUp({
           email,
           password,
           options: {
@@ -201,7 +201,7 @@ function setupFormHandlers() {
     githubBtn.addEventListener('click', async () => {
       clearMessages();
 
-      if (!supabase) {
+      if (!_supabaseClient) {
         showError('Auth not initialized. Check console for errors.');
         return;
       }
@@ -210,7 +210,7 @@ function setupFormHandlers() {
       githubBtn.innerHTML = '<span class="loading-spinner"></span> GitHub';
 
       try {
-        const { error } = await supabase.auth.signInWithOAuth({
+        const { error } = await _supabaseClient.auth.signInWithOAuth({
           provider: 'github',
           options: {
             redirectTo: AUTH_REDIRECT_URL,
@@ -236,7 +236,7 @@ function setupFormHandlers() {
   // sign out
   if (logoutBtn) {
     logoutBtn.addEventListener('click', async () => {
-      const { error } = await supabase.auth.signOut();
+      const { error } = await _supabaseClient.auth.signOut();
 
       if (error) {
         showError(error.message);
@@ -285,10 +285,10 @@ async function initializeAuth() {
       throw new Error('Supabase library not loaded');
     }
 
-    supabase = window._supabaseLib.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    _supabaseClient = window._supabaseLib.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     console.log('✓ Supabase client initialized');
 
-    supabase.auth.onAuthStateChange((event, session) => {
+    _supabaseClient.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_IN' && session?.user) {
         showLoggedIn(session.user);
       } else if (event === 'SIGNED_OUT') {
@@ -305,9 +305,9 @@ async function initializeAuth() {
 
 // check session on load and handle oauth callback
 async function checkSession() {
-  if (!supabase) return;
+  if (!_supabaseClient) return;
 
-  const { data: { session }, error } = await supabase.auth.getSession();
+  const { data: { session }, error } = await _supabaseClient.auth.getSession();
 
   if (error) {
     console.error('Error checking session:', error);
