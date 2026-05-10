@@ -6,20 +6,27 @@
 
   const labauth = {
     user: null,
-    supabase: null,
     listeners: [],
+    initialized: false,
 
     init() {
-      this.supabase = window._supabaseLib ? window._supabaseLib.createClient : null;
-      this.checkSession();
-      this.setupAuthListener();
+      this.waitForSupabase();
+    },
+
+    waitForSupabase() {
+      // auth.js creates _supabaseClient asynchronously
+      // keep checking until it's available
+      if (window._supabaseClient) {
+        this.initialized = true;
+        this.checkSession();
+        this.setupAuthListener();
+      } else {
+        setTimeout(() => this.waitForSupabase(), 100);
+      }
     },
 
     async checkSession() {
-      if (!window._supabaseClient) {
-        setTimeout(() => this.checkSession(), 500);
-        return;
-      }
+      if (!window._supabaseClient) return;
 
       const { data: { session } } = await window._supabaseClient.auth.getSession();
       this.user = session?.user || null;
