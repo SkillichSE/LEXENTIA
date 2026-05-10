@@ -279,6 +279,7 @@ async function initializeAuth() {
 
     const SUPABASE_URL = config?.SUPABASE_URL;
     const SUPABASE_ANON_KEY = config?.SUPABASE_ANON_KEY;
+    console.log('SUPABASE_URL exists:', !!SUPABASE_URL, 'SUPABASE_ANON_KEY exists:', !!SUPABASE_ANON_KEY);
 
     if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
       throw new Error('Supabase credentials are missing. Make sure /api/config returns SUPABASE_URL and SUPABASE_ANON_KEY.');
@@ -287,9 +288,11 @@ async function initializeAuth() {
     if (!window._supabaseLib) {
       throw new Error('Supabase library not loaded');
     }
+    console.log('_supabaseLib exists, creating client...');
 
     _supabaseClient = window._supabaseLib.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    console.log('✓ Supabase client initialized');
+    window._supabaseClient = _supabaseClient;
+    console.log('✓ Supabase client initialized, window._supabaseClient set:', !!window._supabaseClient);
 
     _supabaseClient.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_IN' && session?.user) {
