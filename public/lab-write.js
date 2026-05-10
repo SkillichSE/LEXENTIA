@@ -156,7 +156,8 @@
         return;
       }
 
-      this.openModal();
+      // navigate to standalone editor page
+      window.location.href = '/lab-write.html';
     },
 
     showSignInToast() {

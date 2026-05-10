@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script>(function(){var t=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',t);})();</script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Write Article — Klyxe Lab</title>
+  <link rel="icon" href="/media/L_logo.png" type="image/png">
+  <meta name="description" content="Write and preview articles in markdown.">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/style-spacing.css">
+  <link rel="stylesheet" href="/lab.css">
+  <script src="/app.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>window._supabaseLib = supabase;</script>
+  <script src="/config.js"></script>
+  <script src="/auth.js"></script>
+  <style>
+    .lab-write-page {
+      min-height: calc(100vh - 60px);
+      padding: 20px;
+    }
+    .lab-write-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      display: flex;
+      flex-direction: column;
+      min-height: calc(100vh - 100px);
+      overflow: hidden;
+    }
+    .lab-write-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface-raised);
+    }
+    .lab-write-title {
+      font-family: var(--font-sans);
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin: 0;
+    }
+    .lab-write-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .lab-write-body {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      overflow: hidden;
+    }
+    @media (max-width: 768px) {
+      .lab-write-body {
+        grid-template-columns: 1fr;
+        grid-template-rows: 1fr 1fr;
+      }
+    }
+    .lab-write-editor {
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid var(--border);
+      overflow: hidden;
+    }
+    @media (max-width: 768px) {
+      .lab-write-editor {
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+      }
+    }
+    .lab-write-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(0,0,0,0.2);
+      flex-wrap: wrap;
+    }
+    .lab-write-textarea {
+      flex: 1;
+      width: 100%;
+      padding: 16px;
+      background: transparent;
+      border: none;
+      resize: none;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      line-height: 1.7;
+      color: var(--text-primary);
+      outline: none;
+    }
+    .lab-write-textarea::placeholder {
+      color: var(--text-tertiary);
+    }
+    .lab-write-preview {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background: rgba(0,0,0,0.15);
+    }
+    .lab-write-preview-header {
+      padding: 8px 16px;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-tertiary);
+      border-bottom: 1px solid var(--border);
+      background: rgba(0,0,0,0.2);
+    }
+    .lab-write-preview-content {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      font-family: var(--font-sans);
+      font-size: 14px;
+      line-height: 1.8;
+      color: var(--text-secondary);
+    }
+    .lab-write-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 20px;
+      border-top: 1px solid var(--border);
+      background: var(--surface-raised);
+    }
+    .lab-write-meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
+    }
+    .lab-write-input {
+      padding: 8px 12px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-primary);
+      font-size: 13px;
+      outline: none;
+    }
+    .lab-write-input:focus {
+      border-color: var(--accent);
+    }
+    .lab-write-input-title {
+      flex: 1;
+      max-width: 400px;
+    }
+    .lab-write-buttons {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Sidebar overlay for mobile -->
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+<div class="app-layout">
+  <lex-sidebar></lex-sidebar>
+  <div class="sidebar-main">
+
+    <div class="lab-write-page">
+      <div class="lab-write-container">
+        <div class="lab-write-header">
+          <h3 class="lab-write-title">new article</h3>
+          <div class="lab-write-actions">
+            <a href="/lab.html" class="lab-btn lab-btn-secondary">back to lab</a>
+          </div>
+        </div>
+        <div class="lab-write-body">
+          <div class="lab-write-editor">
+            <div class="lab-write-toolbar" id="lab-editor-toolbar"></div>
+            <textarea class="lab-write-textarea" id="lab-editor-textarea" placeholder="write your article in markdown..."></textarea>
+          </div>
+          <div class="lab-write-preview">
+            <div class="lab-write-preview-header">preview</div>
+            <div class="lab-write-preview-content" id="lab-preview-content"></div>
+          </div>
+        </div>
+        <div class="lab-write-footer">
+          <div class="lab-write-meta">
+            <input type="text" class="lab-write-input lab-write-input-title" id="lab-article-title" placeholder="article title...">
+          </div>
+          <div class="lab-write-buttons">
+            <a href="/lab.html" class="lab-btn lab-btn-secondary">cancel</a>
+            <button class="lab-btn" id="lab-editor-save">save article</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="/lab-auth.js"></script>
+<script src="/lab-toast.js"></script>
+<script src="/lab-editor.js"></script>
+<script src="/lab-preview.js"></script>
+<script src="/sidebar.js"></script>
+<script>
+(function() {
+  'use strict';
+
+  // Initialize toolbar
+  const toolbar = document.getElementById('lab-editor-toolbar');
+  if (toolbar) {
+    const tools = [
+      { icon: 'b', label: 'bold', action: 'bold', shortcut: 'ctrl+b' },
+      { icon: 'i', label: 'italic', action: 'italic', shortcut: 'ctrl+i' },
+      { icon: 'h1', label: 'heading 1', action: 'h1', shortcut: '' },
+      { icon: 'h2', label: 'heading 2', action: 'h2', shortcut: '' },
+      { icon: '"', label: 'quote', action: 'quote', shortcut: '' },
+      { icon: '-', label: 'list', action: 'list', shortcut: '' },
+      { icon: '1.', label: 'numbered list', action: 'orderedlist', shortcut: '' },
+      { icon: '```', label: 'code', action: 'code', shortcut: '' },
+      { icon: 'link', label: 'link', action: 'link', shortcut: '' },
+      { icon: 'img', label: 'image', action: 'image', shortcut: '' }
+    ];
+
+    toolbar.innerHTML = tools.map(tool => `
+      <button class="lab-toolbar-btn" data-action="${tool.action}"
+              title="${tool.label}${tool.shortcut ? ' (' + tool.shortcut + ')' : ''}">
+        <span>${tool.icon}</span>
+      </button>
+    `).join('');
+
+    toolbar.addEventListener('click', (e) => {
+      const btn = e.target.closest('.lab-toolbar-btn');
+      if (btn) {
+        e.preventDefault();
+        const action = btn.dataset.action;
+        if (action && window.labeleditor) {
+          window.labeleditor.applyFormat(action);
+        }
+      }
+    });
+  }
+
+  // Initialize editor and preview
+  if (window.labeleditor) {
+    window.labeleditor.init();
+  }
+  if (window.labpreview) {
+    window.labpreview.init();
+  }
+
+  // Save button
+  const saveBtn = document.getElementById('lab-editor-save');
+  if (saveBtn) {
+    saveBtn.addEventListener('click', () => {
+      const title = document.getElementById('lab-article-title')?.value?.trim();
+      const content = window.labeleditor?.getValue?.() || '';
+
+      if (!title) {
+        window.labtoast?.warning?.('please enter a title', 3000);
+        document.getElementById('lab-article-title')?.focus();
+        return;
+      }
+
+      if (!content.trim()) {
+        window.labtoast?.warning?.('please write some content', 3000);
+        document.getElementById('lab-editor-textarea')?.focus();
+        return;
+      }
+
+      // TODO: implement save functionality
+      window.labtoast?.success?.('article saved (demo)', 3000);
+      console.log({ title, content });
+    });
+  }
+
+  // Check auth
+  if (window.labauth && !window.labauth.isLoggedIn()) {
+    window.labtoast?.warning?.('please sign in to write articles', 4000);
+    setTimeout(() => {
+      window.labauth?.redirectToAuth?.();
+    }, 2000);
+  }
+})();
+</script>
+</body>
+</html>
