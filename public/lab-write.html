@@ -9,6 +9,7 @@
   <meta name="description" content="Write and preview articles in markdown.">
   <link rel="stylesheet" href="/style.css">
   <link rel="stylesheet" href="/style-spacing.css">
+  <link rel="stylesheet" href="/animations.css">
   <link rel="stylesheet" href="/lab.css">
   <script src="/app.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -23,13 +24,15 @@
     .lab-write-container {
       max-width: 1200px;
       margin: 0 auto;
-      background: var(--surface);
-      border: 1px solid var(--border);
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
       border-radius: var(--radius);
       display: flex;
       flex-direction: column;
       min-height: calc(100vh - 100px);
       overflow: hidden;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.1);
     }
     .lab-write-header {
       display: flex;
@@ -142,15 +145,17 @@
     }
     .lab-write-input {
       padding: 8px 12px;
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 8px;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-sm);
       color: var(--text-primary);
       font-size: 13px;
       outline: none;
+      transition: border-color 0.2s, background 0.2s;
     }
     .lab-write-input:focus {
       border-color: var(--accent);
+      background: var(--surface);
     }
     .lab-write-input-title {
       flex: 1;
