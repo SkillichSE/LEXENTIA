@@ -4,7 +4,7 @@
 // global variables
 let _supabaseClient = null;
 
-// dom elements
+// dom elements (only on auth page)
 const authError = document.getElementById('auth-error');
 const authSuccess = document.getElementById('auth-success');
 const authForms = document.getElementById('auth-forms');
@@ -17,6 +17,9 @@ const signinBtn = document.getElementById('signin-btn');
 const signupBtn = document.getElementById('signup-btn');
 const githubBtn = document.getElementById('github-btn');
 const logoutBtn = document.getElementById('logout-btn');
+
+// check if we're on auth page
+const isAuthPage = !!document.getElementById('auth-forms');
 
 const AUTH_REDIRECT_URL = (() => {
   const pathname = window.location.pathname;
@@ -323,14 +326,18 @@ async function checkSession() {
 
 // initialize on page load
 document.addEventListener('DOMContentLoaded', () => {
-  setupTabs();
-  saveButtonText();
-  setupFormHandlers();
+  // auth page specific setup
+  if (isAuthPage) {
+    setupTabs();
+    saveButtonText();
+    setupFormHandlers();
+  }
 
+  // init supabase on all pages
   if (window._supabaseLib) {
     initializeAuth();
   } else {
     console.error('Supabase library not found on window');
-    showError('Supabase library failed to load');
+    if (isAuthPage) showError('Supabase library failed to load');
   }
 });
