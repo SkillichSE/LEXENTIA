@@ -10,6 +10,7 @@
     initialized: false,
 
     init() {
+      console.log('lab-auth: init called, _supabaseClient exists:', !!window._supabaseClient);
       this.waitForSupabase();
     },
 
@@ -17,11 +18,13 @@
       // auth.js creates _supabaseClient asynchronously
       // keep checking until it's available
       if (window._supabaseClient) {
+        console.log('lab-auth: found _supabaseClient, initializing...');
         this.initialized = true;
         this.checkSession();
         this.setupAuthListener();
       } else {
-        setTimeout(() => this.waitForSupabase(), 100);
+        console.log('lab-auth: waiting for _supabaseClient...');
+        setTimeout(() => this.waitForSupabase(), 500);
       }
     },
 
