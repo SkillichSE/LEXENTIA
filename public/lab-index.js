@@ -17,12 +17,14 @@ function applyTheme(t) {
   document.documentElement.setAttribute('data-theme', t);
   localStorage.setItem('theme', t);
   const l = t === 'light';
-  themeToggle.checked = l;
-  themeLabel.textContent = l ? 'Light' : 'Dark';
+  if (themeToggle) themeToggle.checked = l;
+  if (themeLabel) themeLabel.textContent = l ? 'Light' : 'Dark';
 }
 applyTheme(localStorage.getItem('theme') || 'dark');
-themeToggle.addEventListener('change', () =>
-  applyTheme(themeToggle.checked ? 'light' : 'dark'));
+if (themeToggle) {
+  themeToggle.addEventListener('change', () =>
+    applyTheme(themeToggle.checked ? 'light' : 'dark'));
+}
 
 // ── Scroll-shadow на хедере ───────────────────────────────────────────────────
 window.addEventListener('scroll', () =>

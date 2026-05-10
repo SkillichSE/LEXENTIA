@@ -165,7 +165,7 @@
 
         // add sign in button to toast
         setTimeout(() => {
-          const toastel = document.querySelectorAll('.lab-toast-warning');
+          const toastel = document.querySelector('.lab-toast-warning');
           if (toastel && !toastel.querySelector('.lab-toast-action')) {
             const actionbtn = document.createElement('button');
             actionbtn.className = 'lab-toast-action';
