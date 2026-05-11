@@ -1,10 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script>(function(){
-    var t = localStorage.getItem('theme') || 'dark';
-    document.documentElement.setAttribute('data-theme', t);
-  })();</script>
+  <script>(function(){document.documentElement.setAttribute('data-theme',localStorage.getItem('theme')||'dark');})();</script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Klyxe — Lab</title>
@@ -14,41 +11,249 @@
   <link rel="stylesheet" href="/style-spacing.css">
   <link rel="stylesheet" href="/animations.css">
   <link rel="stylesheet" href="/lab.css">
-  <script src="/app.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>window._supabaseLib = supabase;</script>
   <script src="/config.js"></script>
   <script src="/auth.js"></script>
+  <style>
+    .lab-page {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .lab-hero {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 40px 24px;
+      position: relative;
+    }
+    .lab-hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 50% 30%, rgba(99,102,241,0.08) 0%, transparent 50%);
+      pointer-events: none;
+    }
+    .lab-hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(59,130,246,0.1);
+      border: 1px solid rgba(59,130,246,0.25);
+      border-radius: 999px;
+      padding: 4px 12px;
+      font-size: 11px;
+      font-family: var(--font-mono);
+      color: #3B82F6;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+    .lab-hero-title {
+      font-size: clamp(32px, 8vw, 48px);
+      font-weight: 700;
+      letter-spacing: -0.04em;
+      color: var(--text-primary);
+      margin-bottom: 16px;
+      line-height: 1.1;
+    }
+    .lab-hero-subtitle {
+      font-size: 16px;
+      color: var(--text-secondary);
+      max-width: 480px;
+      margin-bottom: 48px;
+      line-height: 1.6;
+    }
+    .lab-cards {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 48px;
+    }
+    .lab-card {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      width: 260px;
+      padding: 28px;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius);
+      text-decoration: none;
+      color: inherit;
+      transition: transform 0.25s cubic-bezier(0.4,0,0.2,1), box-shadow 0.25s, background 0.2s, border-color 0.2s;
+      cursor: pointer;
+    }
+    .lab-card:hover {
+      transform: translateY(-4px);
+      background: rgba(255,255,255,0.10);
+      border-color: rgba(99,102,241,0.35);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.4), 0 0 0 1px rgba(99,102,241,0.15);
+    }
+    .lab-card-icon {
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius-sm);
+      background: rgba(99,102,241,0.12);
+      border: 1px solid rgba(99,102,241,0.25);
+      color: #a5b4fc;
+      margin-bottom: 20px;
+    }
+    .lab-card-title {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+    .lab-card-desc {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+    .lab-footer {
+      font-size: 13px;
+      color: var(--text-tertiary);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      justify-content: center;
+      padding: 40px 24px;
+    }
+    .lab-header {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 24px;
+    }
+    .lab-header-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: var(--text-primary);
+      font-size: 18px;
+      font-weight: 600;
+    }
+    .lab-header-links {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+    }
+    .lab-header-links a {
+      font-size: 13px;
+      font-weight: 500;
+      text-decoration: none;
+      color: var(--text-secondary);
+      transition: color 0.15s;
+    }
+    .lab-header-links a:hover {
+      color: var(--text-primary);
+    }
+    .lab-write-btn {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 20px;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: var(--radius);
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      z-index: 50;
+    }
+    .lab-write-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(99,102,241,0.3);
+    }
+    @media (max-width: 768px) {
+      .lab-cards {
+        flex-direction: column;
+        align-items: center;
+      }
+      .lab-card {
+        width: 100%;
+        max-width: 320px;
+      }
+      .lab-header {
+        padding: 16px;
+      }
+      .lab-header-links {
+        gap: 16px;
+      }
+    }
+  </style>
 </head>
 <body>
-
-<!-- Sidebar overlay for mobile -->
-<div class="sidebar-overlay" id="sidebar-overlay"></div>
-
-<div class="app-layout">
-  <lex-sidebar></lex-sidebar>
-  <div class="sidebar-main">
-
-    <div class="hero" style="border-bottom:1px solid var(--border);background:radial-gradient(ellipse at 50% 30%, rgba(99,102,241,0.08) 0%, transparent 50%);">
-      <div class="hero-inner">
-        <div class="lab-hero-badge">
-          <svg width="10" height="10" viewBox="0 0 16 16" fill="none">
-            <path d="M6 2v5L3 12a1 1 0 00.9 1.5h8.2A1 1 0 0013 12L10 7V2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M5 2h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-          </svg>
-          Research Lab
-        </div>
-        <h1 class="hero-headline">Visualizations &amp; Experiments</h1>
-        <p class="hero-sub">
-          Interactive demos: in-browser neural networks, API exploration, 3D graphs
-        </p>
+<div class="lab-page">
+  <div class="lab-hero">
+    <div class="lab-header">
+      <a href="/" class="lab-header-logo">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"/>
+        </svg>
+        Klyxe
+      </a>
+      <div class="lab-header-links">
+        <a href="/">Home</a>
+        <a href="/about.html">About</a>
+        <a href="/lab.html" style="color: var(--accent);">Lab</a>
       </div>
     </div>
 
-    <main class="container">
-      <div id="lab-cards" class="lab-cards-grid reveal"></div>
-    </main>
+    <div class="lab-hero-inner">
+      <div class="lab-hero-badge">
+        <svg width="10" height="10" viewBox="0 0 16 16" fill="none">
+          <path d="M6 2v5L3 12a1 1 0 00.9 1.5h8.2A1 1 0 0013 12L10 7V2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M5 2h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        Research Lab
+      </div>
+      <h1 class="lab-hero-title">Visualizations &amp; Experiments</h1>
+      <p class="lab-hero-subtitle">
+        Interactive demos: in-browser neural networks, API exploration, 3D graphs
+      </p>
+    </div>
+
+    <div class="lab-cards" id="lab-cards">
+      <!-- Lab cards will be populated by JavaScript -->
+    </div>
+
+    <div class="lab-footer">
+      <span>Interactive experiments</span>
+      <span>·</span>
+      <span>No account needed</span>
+      <span>·</span>
+      <span>Open source</span>
+    </div>
   </div>
+
+  <!-- Write button -->
+  <button class="lab-write-btn" id="lab-write-btn">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+      <path d="m12.2 2.5l1.3 1.3m-9.5 9.5l-2 2 2.8-.7 8.5-8.5-2.8-2.8-8.5 8.5-.7 2.8z" 
+            stroke="currentcolor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <span>write</span>
+  </button>
 </div>
 
 <script src="lab-auth.js"></script>
@@ -57,6 +262,5 @@
 <script src="lab-editor.js"></script>
 <script src="lab-preview.js"></script>
 <script src="lab-index.js"></script>
-<script src="sidebar.js"></script>
 </body>
 </html>
