@@ -1,109 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script>(function(){document.documentElement.setAttribute('data-theme',localStorage.getItem('theme')||'dark');})();</script>
+  <script>(function(){var t=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',t);})();</script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Write Article — Klyxe Lab</title>
   <link rel="icon" href="/media/L_logo.png" type="image/png">
   <meta name="description" content="Write and preview articles in markdown.">
-  <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="style-spacing.css">
-  <link rel="stylesheet" href="animations.css">
-  <link rel="stylesheet" href="lab.css">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/style-spacing.css">
+  <link rel="stylesheet" href="/lab.css">
+  <script src="/app.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>window._supabaseLib = supabase;</script>
   <script src="/config.js"></script>
   <script src="/auth.js"></script>
   <style>
-    .write-page {
-      min-height: 100vh;
+    .lab-write-page {
+      min-height: calc(100vh - 60px);
+      padding: 20px;
+    }
+    .lab-write-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
       display: flex;
       flex-direction: column;
-    }
-    .write-hero {
-      padding: 20px 24px 40px;
-      position: relative;
-      background: radial-gradient(ellipse at 50% 30%, rgba(99,102,241,0.08) 0%, transparent 50%);
-    }
-    .write-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 32px;
-    }
-    .write-logo {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      text-decoration: none;
-      color: var(--text-primary);
-      font-size: 18px;
-      font-weight: 600;
-    }
-    .write-nav {
-      display: flex;
-      align-items: center;
-      gap: 24px;
-    }
-    .write-nav a {
-      font-size: 13px;
-      font-weight: 500;
-      text-decoration: none;
-      color: var(--text-secondary);
-      transition: color 0.15s;
-    }
-    .write-nav a:hover {
-      color: var(--text-primary);
-    }
-    .write-title-section {
-      text-align: center;
-      margin-bottom: 32px;
-    }
-    .write-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: rgba(59,130,246,0.1);
-      border: 1px solid rgba(59,130,246,0.25);
-      border-radius: 999px;
-      padding: 4px 12px;
-      font-size: 11px;
-      font-family: var(--font-mono);
-      color: #3B82F6;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      margin-bottom: 14px;
-    }
-    .write-title {
-      font-size: clamp(28px, 5vw, 36px);
-      font-weight: 700;
-      letter-spacing: -0.04em;
-      color: var(--text-primary);
-      margin-bottom: 12px;
-      line-height: 1.1;
-    }
-    .write-subtitle {
-      font-size: 16px;
-      color: var(--text-secondary);
-      max-width: 600px;
-      margin: 0 auto;
-      line-height: 1.6;
-    }
-    .write-container {
-      max-width: 1200px;
-      margin: 0 auto 40px;
-      padding: 0 24px;
-    }
-    .write-editor {
-      background: var(--glass-bg);
-      border: 1px solid var(--glass-border);
-      border-radius: var(--radius);
+      min-height: calc(100vh - 100px);
       overflow: hidden;
-      backdrop-filter: blur(10px);
-      box-shadow: 0 8px 32px rgba(0,0,0,0.1);
     }
-    .write-header-bar {
+    .lab-write-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -111,42 +39,43 @@
       border-bottom: 1px solid var(--border);
       background: var(--surface-raised);
     }
-    .write-header-title {
+    .lab-write-title {
       font-family: var(--font-sans);
       font-size: 16px;
       font-weight: 600;
       color: var(--text-primary);
       margin: 0;
     }
-    .write-header-actions {
+    .lab-write-actions {
       display: flex;
       align-items: center;
       gap: 12px;
     }
-    .write-body {
+    .lab-write-body {
+      flex: 1;
       display: grid;
       grid-template-columns: 1fr 1fr;
-      min-height: 500px;
+      overflow: hidden;
     }
     @media (max-width: 768px) {
-      .write-body {
+      .lab-write-body {
         grid-template-columns: 1fr;
         grid-template-rows: 1fr 1fr;
-        min-height: 600px;
       }
     }
-    .write-editor-panel {
+    .lab-write-editor {
       display: flex;
       flex-direction: column;
       border-right: 1px solid var(--border);
+      overflow: hidden;
     }
     @media (max-width: 768px) {
-      .write-editor-panel {
+      .lab-write-editor {
         border-right: none;
         border-bottom: 1px solid var(--border);
       }
     }
-    .write-toolbar {
+    .lab-write-toolbar {
       display: flex;
       align-items: center;
       gap: 4px;
@@ -155,7 +84,7 @@
       background: rgba(0,0,0,0.2);
       flex-wrap: wrap;
     }
-    .write-textarea {
+    .lab-write-textarea {
       flex: 1;
       width: 100%;
       padding: 16px;
@@ -168,15 +97,16 @@
       color: var(--text-primary);
       outline: none;
     }
-    .write-textarea::placeholder {
+    .lab-write-textarea::placeholder {
       color: var(--text-tertiary);
     }
-    .write-preview {
+    .lab-write-preview {
       display: flex;
       flex-direction: column;
+      overflow: hidden;
       background: rgba(0,0,0,0.15);
     }
-    .write-preview-header {
+    .lab-write-preview-header {
       padding: 8px 16px;
       font-family: var(--font-mono);
       font-size: 10px;
@@ -186,7 +116,7 @@
       border-bottom: 1px solid var(--border);
       background: rgba(0,0,0,0.2);
     }
-    .write-preview-content {
+    .lab-write-preview-content {
       flex: 1;
       padding: 20px;
       overflow-y: auto;
@@ -195,40 +125,38 @@
       line-height: 1.8;
       color: var(--text-secondary);
     }
-    .write-footer {
+    .lab-write-footer {
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 12px;
-      padding: 16px 20px;
+      padding: 12px 20px;
       border-top: 1px solid var(--border);
       background: var(--surface-raised);
     }
-    .write-meta {
+    .lab-write-meta {
       display: flex;
       align-items: center;
       gap: 12px;
       flex: 1;
     }
-    .write-input {
+    .lab-write-input {
       padding: 8px 12px;
-      background: var(--glass-bg);
-      border: 1px solid var(--glass-border);
-      border-radius: var(--radius-sm);
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
       color: var(--text-primary);
       font-size: 13px;
       outline: none;
-      transition: border-color 0.2s, background 0.2s;
     }
-    .write-input:focus {
+    .lab-write-input:focus {
       border-color: var(--accent);
-      background: var(--surface);
     }
-    .write-input-title {
+    .lab-write-input-title {
       flex: 1;
       max-width: 400px;
     }
-    .write-buttons {
+    .lab-write-buttons {
       display: flex;
       align-items: center;
       gap: 12px;
@@ -236,66 +164,44 @@
   </style>
 </head>
 <body>
-<div class="write-page">
-  <div class="write-hero">
-    <div class="write-header">
-      <a href="/" class="write-logo">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"/>
-        </svg>
-        Klyxe
-      </a>
-      <div class="write-nav">
-        <a href="/">Home</a>
-        <a href="/about.html">About</a>
-        <a href="/lab.html">Lab</a>
-        <a href="/lab-write.html" style="color: var(--accent);">Write</a>
+
+<!-- Sidebar overlay for mobile -->
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+<div class="app-layout">
+  <lex-sidebar></lex-sidebar>
+  <div class="sidebar-main">
+
+    <div class="lab-write-page">
+      <div class="lab-write-container">
+        <div class="lab-write-header">
+          <h3 class="lab-write-title">new article</h3>
+          <div class="lab-write-actions">
+            <a href="/lab.html" class="lab-btn lab-btn-secondary">back to lab</a>
+          </div>
+        </div>
+        <div class="lab-write-body">
+          <div class="lab-write-editor">
+            <div class="lab-write-toolbar" id="lab-editor-toolbar"></div>
+            <textarea class="lab-write-textarea" id="lab-editor-textarea" placeholder="write your article in markdown..."></textarea>
+          </div>
+          <div class="lab-write-preview">
+            <div class="lab-write-preview-header">preview</div>
+            <div class="lab-write-preview-content" id="lab-preview-content"></div>
+          </div>
+        </div>
+        <div class="lab-write-footer">
+          <div class="lab-write-meta">
+            <input type="text" class="lab-write-input lab-write-input-title" id="lab-article-title" placeholder="article title...">
+          </div>
+          <div class="lab-write-buttons">
+            <a href="/lab.html" class="lab-btn lab-btn-secondary">cancel</a>
+            <button class="lab-btn" id="lab-editor-save">save article</button>
+          </div>
+        </div>
       </div>
     </div>
 
-    <div class="write-title-section">
-      <div class="write-badge">
-        <svg width="10" height="10" viewBox="0 0 16 16" fill="none">
-          <path d="m12.2 2.5l1.3 1.3m-9.5 9.5l-2 2 2.8-.7 8.5-8.5-2.8-2.8-8.5 8.5-.7 2.8z" 
-                stroke="currentcolor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        Article Editor
-      </div>
-      <h1 class="write-title">Write Your Article</h1>
-      <p class="write-subtitle">
-        Create beautiful articles with live markdown preview and formatting tools
-      </p>
-    </div>
-  </div>
-
-  <div class="write-container">
-    <div class="write-editor">
-      <div class="write-header-bar">
-        <h3 class="write-header-title">new article</h3>
-        <div class="write-header-actions">
-          <a href="/lab.html" class="lab-btn lab-btn-secondary">back to lab</a>
-        </div>
-      </div>
-      <div class="write-body">
-        <div class="write-editor-panel">
-          <div class="write-toolbar" id="lab-editor-toolbar"></div>
-          <textarea class="write-textarea" id="lab-editor-textarea" placeholder="write your article in markdown..."></textarea>
-        </div>
-        <div class="write-preview">
-          <div class="write-preview-header">preview</div>
-          <div class="write-preview-content" id="lab-preview-content"></div>
-        </div>
-      </div>
-      <div class="write-footer">
-        <div class="write-meta">
-          <input type="text" class="write-input write-input-title" id="lab-article-title" placeholder="article title...">
-        </div>
-        <div class="write-buttons">
-          <a href="/lab.html" class="lab-btn lab-btn-secondary">cancel</a>
-          <button class="lab-btn" id="lab-editor-save">save article</button>
-        </div>
-      </div>
-    </div>
   </div>
 </div>
 
@@ -303,6 +209,7 @@
 <script src="/lab-toast.js"></script>
 <script src="/lab-editor.js"></script>
 <script src="/lab-preview.js"></script>
+<script src="/sidebar.js"></script>
 <script>
 (function() {
   'use strict';
