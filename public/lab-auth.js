@@ -8,6 +8,8 @@
     user: null,
     listeners: [],
     initialized: false,
+    maxWaitTime: 3000, // wait max 3 seconds for supabase
+    startTime: Date.now(),
 
     init() {
       console.log('lab-auth: init called, _supabaseClient exists:', !!window._supabaseClient);
@@ -16,12 +18,18 @@
 
     waitForSupabase() {
       // auth.js creates _supabaseClient asynchronously
-      // keep checking until it's available
+      // keep checking until it's available, but don't wait forever
+      const elapsed = Date.now() - this.startTime;
+      
       if (window._supabaseClient) {
         console.log('lab-auth: found _supabaseClient, initializing...');
         this.initialized = true;
         this.checkSession();
         this.setupAuthListener();
+      } else if (elapsed > this.maxWaitTime) {
+        console.log('lab-auth: timeout waiting for _supabaseClient after 3s, proceeding without auth');
+        this.initialized = true;
+        this.notifyListeners();
       } else {
         console.log('lab-auth: waiting for _supabaseClient...');
         setTimeout(() => this.waitForSupabase(), 500);
@@ -32,24 +40,32 @@
       if (!window._supabaseClient) return;
 
       console.log('lab-auth: checking session...');
-      const { data: { session }, error } = await window._supabaseClient.auth.getSession();
-      if (error) console.error('lab-auth: getSession error:', error);
-      console.log('lab-auth: session found:', !!session);
-      this.user = session?.user || null;
+      try {
+        const { data: { session }, error } = await window._supabaseClient.auth.getSession();
+        if (error) console.error('lab-auth: getSession error:', error);
+        console.log('lab-auth: session found:', !!session);
+        this.user = session?.user || null;
+      } catch (e) {
+        console.error('lab-auth: checkSession error:', e);
+      }
       this.notifyListeners();
     },
 
     setupAuthListener() {
       if (!window._supabaseClient) return;
 
-      window._supabaseClient.auth.onAuthStateChange((event, session) => {
-        if (event === 'SIGNED_IN') {
-          this.user = session?.user || null;
-        } else if (event === 'SIGNED_OUT') {
-          this.user = null;
-        }
-        this.notifyListeners();
-      });
+      try {
+        window._supabaseClient.auth.onAuthStateChange((event, session) => {
+          if (event === 'SIGNED_IN') {
+            this.user = session?.user || null;
+          } else if (event === 'SIGNED_OUT') {
+            this.user = null;
+          }
+          this.notifyListeners();
+        });
+      } catch (e) {
+        console.error('lab-auth: setupAuthListener error:', e);
+      }
     },
 
     isLoggedIn() {
